@@ -14,6 +14,8 @@ INITIALIZER:
 STATECHART:
     A [CS][DS] 
      A0 [DS]
+     A1
+     A2
     B [CS][DS]
      B0 [DS]
      B1 
@@ -43,4 +45,17 @@ TRANSITION:
     S: A.A0
     N: A.A0
     T: 1  # by default, it is [RTT]
-    O: g.increaseTimeByOne()    
+    O: g.increaseTimeByOne()
+    
+TRANSITION:
+    S: A.A0
+    N: A.A1
+    E: initChrono
+    O: print "bottom right pressed"
+    
+TRANSITION:
+    S: A.A1
+    N: A.A2
+    T: 1.5  # by default, it is [RTT]
+    O: g.startSelection()
+             
