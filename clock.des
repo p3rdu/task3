@@ -70,4 +70,10 @@ TRANSITION:
     N: A.A2
     T: 1.5  # by default, it is [RTT]
     O: g.startSelection()
+    
+TRANSITION:
+    S: A.A2
+    N: A.A2
+    E: increase
+    O: g.increaseTimeByOne()    
              
