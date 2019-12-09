@@ -13,20 +13,22 @@ INITIALIZER:
 
 STATECHART:
     A [CS][DS] 
-     A0 [DS]
-     A1
+     CLOCKTICKING [DS]
+     SETTIMEBUTTONKEPTPRESSED
      SETHOURS
      SETMINUTES
      SETSECONDS
     B [CS][DS]
-     B0 [DS]
-     B1 
-     B2
+     LIGHTOFF [DS]
+     LIGHTONBUTTONKEPTPRESSED 
+     LIGHTONBUTTONRELEASED
     C [CS][DS]
      TIMEDISPLAY [DS]
      ALARMDISPLAY
-     ALARMTOSET
-     SETALARM
+     ALARMBUTTONKEPTPRESSED
+     SETALARMHOURS
+     SETALARMMINUTES
+     SETALARMSECONDS
      CHRONODISPLAY
     D [CS][DS]
      CHRONOSTOPPED [DS]
@@ -34,46 +36,46 @@ STATECHART:
          
     
 TRANSITION:
-    S: B.B0
-    N: B.B1
+    S: B.LIGHTOFF
+    N: B.LIGHTONBUTTONKEPTPRESSED
     E: lightOn
     O: print "set light on"
        g.setIndiglo()
 
 TRANSITION:
-    S: B.B1
-    N: B.B2
+    S: B.LIGHTONBUTTONKEPTPRESSED
+    N: B.LIGHTONBUTTONRELEASED
     E: lightOff
     O: print "light goes off after 2 sec"
 
 TRANSITION:
-    S: B.B2
-    N: B.B0
+    S: B.LIGHTONBUTTONRELEASED
+    N: B.LIGHTOFF
     T: 2  # by default, it is [RTT]
     O: print "light off"
        g.unsetIndiglo()       
        
 TRANSITION:
-    S: A.A0
-    N: A.A0
+    S: A.CLOCKTICKING
+    N: A.CLOCKTICKING
     T: 1  # by default, it is [RTT]
     O: g.increaseTimeByOne()
     
 TRANSITION:
-    S: A.A0
-    N: A.A1
+    S: A.CLOCKTICKING
+    N: A.SETTIMEBUTTONKEPTPRESSED
     C: [INSTATE("C.TIMEDISPLAY")]
     E: initChrono
     O: print "bottom right pressed"
     
 TRANSITION:
-    S: A.A1
-    N: A.A0
+    S: A.SETTIMEBUTTONKEPTPRESSED
+    N: A.CLOCKTICKING
     E: released
     O: print "bottom right released"            
     
 TRANSITION:
-    S: A.A1
+    S: A.SETTIMEBUTTONKEPTPRESSED
     N: A.SETHOURS
     T: 1.5  # by default, it is [RTT]
     O: g.startSelection()
@@ -110,21 +112,21 @@ TRANSITION:
     
 TRANSITION:
     S: A.SETSECONDS
-    N: A.A0
+    N: A.CLOCKTICKING
     T: 5
     O: g.stopSelection()
        g.refreshTimeDisplay()
 
 TRANSITION:
     S: A.SETMINUTES
-    N: A.A0
+    N: A.CLOCKTICKING
     T: 5
     O: g.stopSelection()
        g.refreshTimeDisplay()
 
 TRANSITION:
     S: A.SETHOURS
-    N: A.A0
+    N: A.CLOCKTICKING
     T: 5
     O: g.stopSelection() 
        g.refreshTimeDisplay()
@@ -149,25 +151,70 @@ TRANSITION:
     
 TRANSITION:
     S: C.TIMEDISPLAY
-    N: C.ALARMTOSET
+    N: C.ALARMBUTTONKEPTPRESSED
+    C: [INSTATE("A.CLOCKTICKING")]
     E: setAlarm
     O: g.refreshAlarmDisplay()
     
 TRANSITION:
-    S: C.ALARMTOSET
-    N: C.SETALARM
+    S: C.ALARMBUTTONKEPTPRESSED
+    N: C.SETALARMHOURS
     T: 1.5
     O: g.startSelection()
     
 TRANSITION:
-    S: C.SETALARM
+    S: C.SETALARMHOURS
+    N: C.SETALARMHOURS
+    E: increase
+    O: g.increaseSelection()
+
+TRANSITION:
+    S: C.SETALARMHOURS
+    N: C.SETALARMMINUTES
+    E: editTime
+    O: g.selectNext()   
+
+TRANSITION:
+    S: C.SETALARMMINUTES
+    N: C.SETALARMMINUTES
+    E: increase
+    O: g.increaseSelection()
+
+TRANSITION:
+    S: C.SETALARMMINUTES
+    N: C.SETALARMSECONDS
+    E: editTime
+    O: g.selectNext() 
+        
+TRANSITION:
+    S: C.SETALARMSECONDS
+    N: C.SETALARMSECONDS
+    E: increase
+    O: g.increaseSelection()           
+          
+TRANSITION:
+    S: C.SETALARMHOURS
     N: C.ALARMDISPLAY
     T: 5
     O: g.stopSelection()
        g.refreshAlarmDisplay()
-     
+       
 TRANSITION:
-    S: C.ALARMTOSET
+    S: C.SETALARMMINUTES
+    N: C.ALARMDISPLAY
+    T: 5
+    O: g.stopSelection()
+       g.refreshAlarmDisplay()  
+
+TRANSITION:
+    S: C.SETALARMSECONDS
+    N: C.ALARMDISPLAY
+    T: 5
+    O: g.stopSelection()
+       g.refreshAlarmDisplay() 
+          
+TRANSITION:
+    S: C.ALARMBUTTONKEPTPRESSED
     N: C.ALARMDISPLAY
     E: onoff
     O: g.refreshAlarmDisplay()    
