@@ -24,6 +24,9 @@ STATECHART:
      B2
     C [CS][DS]
      TIMEDISPLAY [DS]
+     ALARMDISPLAY
+     ALARMTOSET
+     SETALARM
      CHRONODISPLAY
     D [CS][DS]
      CHRONOSTOPPED [DS]
@@ -143,6 +146,37 @@ TRANSITION:
     N: C.CHRONODISPLAY
     E: changeMode
     O: g.refreshChronoDisplay()
+    
+TRANSITION:
+    S: C.TIMEDISPLAY
+    N: C.ALARMTOSET
+    E: setAlarm
+    O: g.refreshAlarmDisplay()
+    
+TRANSITION:
+    S: C.ALARMTOSET
+    N: C.SETALARM
+    T: 1.5
+    O: g.startSelection()
+    
+TRANSITION:
+    S: C.SETALARM
+    N: C.ALARMDISPLAY
+    T: 5
+    O: g.stopSelection()
+       g.refreshAlarmDisplay()
+     
+TRANSITION:
+    S: C.ALARMTOSET
+    N: C.ALARMDISPLAY
+    E: onoff
+    O: g.refreshAlarmDisplay()    
+    
+TRANSITION:
+    S: C.ALARMDISPLAY
+    N: C.TIMEDISPLAY
+    E: setAlarm
+    O: g.refreshAlarmDisplay()         
 
 TRANSITION:
     S: C.CHRONODISPLAY
@@ -161,4 +195,27 @@ TRANSITION:
     S: D.CHRONORUNNING
     N: D.CHRONORUNNING
     T: 0.01
-    O: g.increaseChronoByOne()                                                                 
+    O: g.increaseChronoByOne()
+    
+TRANSITION:
+    S: D.CHRONORUNNING
+    N: D.CHRONOSTOPPED
+    C: [INSTATE("C.CHRONODISPLAY")]
+    E: initChrono
+    O: print "Stop chrono"
+    
+TRANSITION:
+    S: D.CHRONORUNNING
+    N: D.CHRONORUNNING
+    C: [INSTATE("C.CHRONODISPLAY")]
+    E: resetChrono
+    O: g.resetChrono()
+    
+TRANSITION:
+    S: D.CHRONOSTOPPED
+    N: D.CHRONOSTOPPED
+    C: [INSTATE("C.CHRONODISPLAY")]
+    E: resetChrono
+    O: g.resetChrono()                 
+    
+                                                                    
