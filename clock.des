@@ -55,6 +55,18 @@ TRANSITION:
     
 TRANSITION:
     S: A.A1
+    N: A.A0
+    E: released
+    O: print "bottom right released"
+    
+TRANSITION:
+    S: A.A0
+    N: A.A1
+    E: initChrono
+    O: print "bottom right pressed"        
+    
+TRANSITION:
+    S: A.A1
     N: A.A2
     T: 1.5  # by default, it is [RTT]
     O: g.startSelection()
