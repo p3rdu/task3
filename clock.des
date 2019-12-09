@@ -15,11 +15,20 @@ STATECHART:
     A [CS][DS] 
      A0 [DS]
      A1
-     A2
+     SETHOURS
+     SETMINUTES
+     SETSECONDS
     B [CS][DS]
      B0 [DS]
      B1 
-     B2   
+     B2
+    C [CS][DS]
+     TIMEDISPLAY [DS]
+     CHRONODISPLAY
+    D [CS][DS]
+     CHRONOSTOPPED [DS]
+     CHRONORUNNING 
+         
     
 TRANSITION:
     S: B.B0
@@ -50,6 +59,7 @@ TRANSITION:
 TRANSITION:
     S: A.A0
     N: A.A1
+    C: [INSTATE("C.TIMEDISPLAY")]
     E: initChrono
     O: print "bottom right pressed"
     
@@ -57,23 +67,98 @@ TRANSITION:
     S: A.A1
     N: A.A0
     E: released
-    O: print "bottom right released"
-    
-TRANSITION:
-    S: A.A0
-    N: A.A1
-    E: initChrono
-    O: print "bottom right pressed"        
+    O: print "bottom right released"            
     
 TRANSITION:
     S: A.A1
-    N: A.A2
+    N: A.SETHOURS
     T: 1.5  # by default, it is [RTT]
     O: g.startSelection()
     
 TRANSITION:
-    S: A.A2
-    N: A.A2
+    S: A.SETHOURS
+    N: A.SETHOURS
     E: increase
-    O: g.increaseTimeByOne()    
-             
+    O: g.increaseSelection()
+    
+TRANSITION:
+    S: A.SETHOURS
+    N: A.SETMINUTES
+    E: editTime
+    O: g.selectNext()
+
+TRANSITION:
+    S: A.SETMINUTES
+    N: A.SETMINUTES
+    E: increase
+    O: g.increaseSelection() 
+    
+TRANSITION:
+    S: A.SETMINUTES
+    N: A.SETSECONDS
+    E: editTime
+    O: g.selectNext()
+
+TRANSITION:
+    S: A.SETSECONDS
+    N: A.SETSECONDS
+    E: increase
+    O: g.increaseSelection()
+    
+TRANSITION:
+    S: A.SETSECONDS
+    N: A.A0
+    T: 5
+    O: g.stopSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: A.SETMINUTES
+    N: A.A0
+    T: 5
+    O: g.stopSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: A.SETHOURS
+    N: A.A0
+    T: 5
+    O: g.stopSelection() 
+       g.refreshTimeDisplay()
+       
+TRANSITION:
+    S: C.TIMEDISPLAY
+    N: C.TIMEDISPLAY
+    T: 1
+    O: g.refreshTimeDisplay()       
+
+TRANSITION:
+    S: C.CHRONODISPLAY
+    N: C.CHRONODISPLAY
+    T: 0.01
+    O: g.refreshChronoDisplay()
+           
+TRANSITION:
+    S: C.TIMEDISPLAY
+    N: C.CHRONODISPLAY
+    E: changeMode
+    O: g.refreshChronoDisplay()
+
+TRANSITION:
+    S: C.CHRONODISPLAY
+    N: C.TIMEDISPLAY
+    E: changeMode
+    O: g.refreshTimeDisplay()
+    
+TRANSITION:
+    S: D.CHRONOSTOPPED
+    N: D.CHRONORUNNING
+    C: [INSTATE("C.CHRONODISPLAY")]
+    E: initChrono
+    O: print "Start running chrono" 
+
+TRANSITION:
+    S: D.CHRONORUNNING
+    N: D.CHRONORUNNING
+    T: 0.01
+    O: g.increaseChronoByOne()                                                                 
